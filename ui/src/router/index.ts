@@ -1,21 +1,26 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import DisruptionManagerView from '../views/DisruptionManagerView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      // view to manage disruption items
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: DisruptionManagerView,
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue'),
+      // view to show a user's information
+      path: '/me',
+      name: 'user-me',
+      component: () => import('../views/UserInfoView.vue'),
+    },
+    {
+      // view add a new disruption item
+      path: '/add-disruption-item',
+      name: 'add-disruption-item',
+      component: () => import('../views/AddDisruptionItemView.vue'),
     },
   ],
 })
