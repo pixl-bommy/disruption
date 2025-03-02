@@ -58,7 +58,27 @@ func CreateDisruption(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetDisruptions(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("api/v1: STUB: GetDisruptions called")
+	fmt.Println("api/v1: GetDisruptions called")
+
+	// read all entries from storage
+	disruptions, err := services.Disruptions.GetAll()
+	if err != nil {
+		fmt.Println("api/v1: GetDisruptions failed to get all disruptions:", err)
+
+		// return empty array if no entries found
+		w.Write([]byte("[]"))
+		return
+	}
+
+	// write all entries to response
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(disruptions)
+	if err != nil {
+		fmt.Println("api/v1: GetDisruptions failed to encode disruptions:", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func DeleteDisruption(w http.ResponseWriter, r *http.Request) {

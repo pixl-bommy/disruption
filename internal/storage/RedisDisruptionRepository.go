@@ -2,7 +2,6 @@ package storage
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -92,8 +91,35 @@ func (r *RedisDisruptionRepository) Delete(uid, userId string) (bool, error) {
 	return true, nil
 }
 
-func (r *RedisDisruptionRepository) GetAll() ([]DisruptionEntry, error) {
-	return nil, errors.New("not implemented")
+func (r *RedisDisruptionRepository) GetAll() ([]*DisruptionEntryRaw, error) {
+	// read all entries from "derivate" store
+	derivateRootKey := configs.KeyPrefix + ":" + disruptionsDerivateKey + ":*"
+	derivateItemKeys, err := r.client.Keys(*r.context, derivateRootKey).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	// read all entries from "derivate" store
+	disruptionEntries := make([]*DisruptionEntryRaw, 0)
+	for _, derivateKey := range derivateItemKeys {
+		derivateItem, err := r.client.HGetAll(*r.context, derivateKey).Result()
+		if err != nil {
+			fmt.Println("Failed to read derivate entry:", err)
+			continue
+		}
+
+		// parse
+
+		disruptionEntry, err := parseHashToDisruptionEntryRaw(derivateItem)
+		if err != nil {
+			fmt.Println("Failed to parse derivate entry:", err)
+			continue
+		}
+
+		disruptionEntries = append(disruptionEntries, disruptionEntry)
+	}
+
+	return disruptionEntries, nil
 }
 
 // Stores the a disruption item in the redis "event source" stream.
@@ -140,4 +166,43 @@ func (r *RedisDisruptionRepository) storeDerivateEntry(disruptionItem *Disruptio
 	}
 
 	return nil
+}
+
+func parseHashToDisruptionEntryRaw(hash map[string]string) (*DisruptionEntryRaw, error) {
+	// make sure all required fields are present
+	if _, ok := hash["uid"]; !ok {
+		return nil, fmt.Errorf("missing field 'uid'")
+	}
+	if _, ok := hash["name"]; !ok {
+		return nil, fmt.Errorf("missing field 'name'")
+	}
+	if _, ok := hash["description"]; !ok {
+		return nil, fmt.Errorf("missing field 'description'")
+	}
+	if _, ok := hash["status"]; !ok {
+		return nil, fmt.Errorf("missing field 'status'")
+	}
+	if _, ok := hash["modified_by"]; !ok {
+		return nil, fmt.Errorf("missing field 'modified_by'")
+	}
+
+	// parse timestamps
+	createdAt, err := strconv.ParseInt(hash["created_at"], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	modifiedAt, err := strconv.ParseInt(hash["modified_at"], 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DisruptionEntryRaw{
+		UID:         hash["uid"],
+		Name:        hash["name"],
+		Description: hash["description"],
+		Status:      hash["status"],
+		ModifiedBy:  hash["modified_by"],
+		CreatedAt:   createdAt,
+		ModifiedAt:  modifiedAt,
+	}, nil
 }
