@@ -9,6 +9,10 @@
       <p>{{ user.uid }}</p>
       <p>{{ user.name }}</p>
     </div>
+
+    <button @click="openDialog">Add Item</button>
+
+    <AddDisruptionItemDialog v-if="isShowDialog" @on-close="closeDialog" />
   </div>
 </template>
 
@@ -17,12 +21,22 @@ import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { getUserMe } from '@/api/users'
+import AddDisruptionItemDialog from '@/components/AddDisruptionItemDialog.vue'
 
 const route = useRoute()
 
 const loading = ref(false)
-const user = ref(null)
-const error = ref(null)
+const user = ref<{ uid: string; name: string } | null>(null)
+const error = ref<unknown | null>(null)
+
+const isShowDialog = ref(false)
+function openDialog() {
+  isShowDialog.value = true
+}
+function closeDialog(action: 'saved' | 'cancelled' | 'failed') {
+  console.log(action)
+  isShowDialog.value = false
+}
 
 async function fetchUserData() {
   error.value = user.value = null
@@ -31,7 +45,7 @@ async function fetchUserData() {
   try {
     user.value = await getUserMe()
   } catch (err) {
-    error.value = err.toString()
+    error.value = err?.toString() ?? null
   } finally {
     loading.value = false
   }
