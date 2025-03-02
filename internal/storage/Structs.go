@@ -25,8 +25,8 @@ type DisruptionEntryRaw struct {
 	Description string `json:"description,omitempty" redis:"description,omitempty"`
 	Status      string `json:"status,omitempty"      redis:"status,omitempty"`
 	ModifiedBy  string `json:"modifiedBy,omitempty"  redis:"modified_by,omitempty"`
-	CreatedAt   int64  `json:"createdAt,omitempty"   redis:"-"`
-	ModifiedAt  int64  `json:"modifiedAt,omitempty"  redis:"-"`
+	CreatedAt   int64  `json:"createdAt,omitempty"   redis:"created_at,omitempty"`
+	ModifiedAt  int64  `json:"modifiedAt,omitempty"  redis:"modified_at,omitempty"`
 }
 
 func NewDisruptionEntry(name, description string, modifiedBy string) (*DisruptionEntry, error) {
@@ -41,6 +41,23 @@ func NewDisruptionEntry(name, description string, modifiedBy string) (*Disruptio
 		Description: description,
 		Status:      DisruptionStatusActive,
 		ModifiedBy:  modifierUserId,
+	}, nil
+}
+
+func PartialDisruptionEntry(uid, modifiedBy string) (*DisruptionEntry, error) {
+	uidUUID, err := uuid.Parse(uid)
+	if err != nil {
+		return nil, err
+	}
+
+	modifierUserId, err := uuid.Parse(modifiedBy)
+	if err != nil {
+		return nil, err
+	}
+
+	return &DisruptionEntry{
+		UID:        uidUUID,
+		ModifiedBy: modifierUserId,
 	}, nil
 }
 

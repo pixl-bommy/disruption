@@ -14,7 +14,7 @@ func (s *DisruptionService) Create(name, description, userId string) (string, er
 	return s.repo.Create(name, description, userId)
 }
 
-func (s *DisruptionService) Delete(uid, userId string) error {
+func (s *DisruptionService) Delete(uid, userId string) (bool, error) {
 	return s.repo.Delete(uid, userId)
 }
 

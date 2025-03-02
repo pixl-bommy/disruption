@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/pixl-bommy/disruption/configs"
 	"github.com/pixl-bommy/disruption/internal/services"
 )
@@ -60,5 +62,48 @@ func GetDisruptions(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteDisruption(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("api/v1: STUB: DeleteDisruption called")
+	fmt.Println("api/v1: DeleteDisruption called")
+
+	// get itemId from url
+	rawDisruptionId := mux.Vars(r)["disruption-id"]
+	_, err := uuid.Parse(rawDisruptionId)
+	if err != nil {
+		fmt.Println("api/v1: DeleteDisruption invalid disruption id")
+		fmt.Println("   ", err)
+
+		http.Error(w, "disruption id is not valid", http.StatusUnprocessableEntity)
+		return
+	}
+
+	// Extract the user id from the request json body
+	// TODO: should be extracted from the JWT token or some other secure source
+	userId := configs.OneAndOnlyUserUid
+
+	// Validate the request json body
+	if rawDisruptionId == "" || userId == "" {
+		fmt.Println("api/v1: DeleteDisruption invalid request")
+
+		http.Error(w, "request is not valid", http.StatusUnprocessableEntity)
+		return
+	}
+
+	// Create a new disruption
+	isDeleted, err := services.Disruptions.Delete(rawDisruptionId, userId)
+	if err != nil {
+		fmt.Println("api/v1: DeleteDisruption failed to delete:", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	if !isDeleted {
+		fmt.Println("api/v1: DeleteDisruption has nothing to delete:", err)
+
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	fmt.Println("api/v1: DeleteDisruption deleted disruption with id:", rawDisruptionId)
+
+	w.WriteHeader(http.StatusNoContent)
 }
