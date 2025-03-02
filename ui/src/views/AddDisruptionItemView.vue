@@ -1,6 +1,6 @@
 <template>
   <div>
-    <code class="header">$> add desruption item</code>
+    <PageTitle title="add disruption item" />
     <form action="" @submit="saveAndClose">
       <p>Bezeichnung</p>
       <input v-model="disruptionName" type="text" required />
@@ -19,6 +19,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { saveNewDisruptionItem } from '@/api/disruptions'
+import PageTitle from '@/components/PageTitle.vue'
 
 // routing
 const router = useRouter()

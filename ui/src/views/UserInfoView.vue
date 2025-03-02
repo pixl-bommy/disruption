@@ -1,5 +1,6 @@
 <template>
   <div>
+    <PageTitle :title="headerTitle" />
     <code class="header">$> whois {{ loading ? '...' : user?.name }}</code>
     <div v-if="loading" class="loading">Loading...</div>
 
@@ -13,17 +14,20 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import { getUserMe } from '@/api/users'
 import type { UserInfo } from '@/types/users'
+import PageTitle from '@/components/PageTitle.vue'
 
 const route = useRoute()
 
 const error = ref<unknown | null>(null)
 const loading = ref(false)
 const user = ref<UserInfo | null>(null)
+
+const headerTitle = computed(() => 'whois ' + (user.value?.name ?? 'user info'))
 
 /**
  * Fetch the user data from the API.

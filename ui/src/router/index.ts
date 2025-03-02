@@ -1,14 +1,20 @@
+import DailyDisruptionsView from '@/views/DailyDisruptionsView.vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import DisruptionManagerView from '../views/DisruptionManagerView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      // view to manage disruption items
+      // view to track daily disruptions
       path: '/',
-      name: 'home',
-      component: DisruptionManagerView,
+      name: 'daily-disruptions',
+      component: DailyDisruptionsView,
+    },
+    {
+      // view to manage disruption items
+      path: '/manage',
+      name: 'manage-disruption-items',
+      component: () => import('../views/DisruptionManagerView.vue'),
     },
     {
       // view to show a user's information

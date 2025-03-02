@@ -1,12 +1,16 @@
 <template>
   <div>
-    <PageTitle title="manage disruptions" />
+    <PageTitle title="daily disruptions" />
     <div v-if="loading" class="loading">Loading...</div>
 
-    <div v-if="disruptions">
-      <ul v-for="disruption in disruptions" :key="disruption.id">
-        <li>{{ disruption.name }}: {{ disruption.description }}</li>
-      </ul>
+    <div class="button-list" v-if="disruptions">
+      <EventItemButton
+        v-for="disruption in disruptions"
+        :key="disruption.id"
+        :item-id="disruption.id"
+        :button-text="disruption.name"
+        @click="handleDisruptionClick"
+      />
     </div>
 
     <div v-if="disruptions">
@@ -21,6 +25,7 @@ import { useLink, useRoute } from 'vue-router'
 
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
+import EventItemButton from '@/components/EventItemButton.vue'
 import PageTitle from '@/components/PageTitle.vue'
 
 const route = useRoute()
@@ -28,6 +33,13 @@ const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })
 
 const disruptions = ref<DisruptionItemList | null>(null)
 const loading = ref(false)
+
+/**
+ * Handle the click event on a disruption item.
+ */
+async function handleDisruptionClick(payload: { itemId: string }) {
+  console.log('Disruption clicked:', payload.itemId)
+}
 
 /**
  * Fetch the list of disruption items from the API.
@@ -49,3 +61,11 @@ async function fetchDisruptions() {
 // fetch the list of disruption items when the route changes
 watch(() => route.path, fetchDisruptions, { immediate: true })
 </script>
+
+<style scoped>
+.button-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  justify-content: normal;
+}
+</style>
