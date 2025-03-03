@@ -1,6 +1,5 @@
 <template>
   <div>
-    <PageTitle :title="headerTitle" />
     <code class="header">$> whois {{ loading ? '...' : user?.name }}</code>
     <div v-if="loading" class="loading">Loading...</div>
 
@@ -19,7 +18,6 @@ import { useRoute } from 'vue-router'
 
 import { getUserMe } from '@/api/users'
 import type { UserInfo } from '@/types/users'
-import PageTitle from '@/components/PageTitle.vue'
 
 const route = useRoute()
 

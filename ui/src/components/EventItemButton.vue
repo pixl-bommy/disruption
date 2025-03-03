@@ -27,9 +27,9 @@ const animationEnd = () => {
   justify-content: center;
   position: relative;
   margin: 0.25rem;
-  padding: 0.5rem;
+  padding: 0.7rem 0;
   text-align: center;
-  font-size: 1.3rem;
+  font-size: 1rem;
   border-radius: 0.5rem;
   border: 1px solid currentColor;
   cursor: pointer;

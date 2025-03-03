@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageTitle title="daily disruptions" />
     <div v-if="loading" class="loading">Loading...</div>
 
     <div class="button-list" v-if="disruptions">
+      <EventAddButton @click="gotoAddDisruptionItem.navigate">Add Item</EventAddButton>
       <EventItemButton
         v-for="disruption in disruptions"
         :key="disruption.id"
@@ -11,10 +11,6 @@
         :button-text="disruption.name"
         @click="handleDisruptionClick"
       />
-    </div>
-
-    <div v-if="disruptions">
-      <button @click="gotoAddDisruptionItem.navigate">Add Item</button>
     </div>
   </div>
 </template>
@@ -26,7 +22,7 @@ import { useLink, useRoute } from 'vue-router'
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
 import EventItemButton from '@/components/EventItemButton.vue'
-import PageTitle from '@/components/PageTitle.vue'
+import EventAddButton from '@/components/EventAddButton.vue'
 
 const route = useRoute()
 const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })

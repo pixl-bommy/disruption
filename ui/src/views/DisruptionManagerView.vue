@@ -1,6 +1,5 @@
 <template>
   <div>
-    <PageTitle title="manage disruptions" />
     <div v-if="loading" class="loading">Loading...</div>
 
     <div v-if="disruptions">
@@ -21,7 +20,6 @@ import { useLink, useRoute } from 'vue-router'
 
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
-import PageTitle from '@/components/PageTitle.vue'
 
 const route = useRoute()
 const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })

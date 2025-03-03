@@ -1,37 +1,49 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-</script>
-
 <template>
-  <header>
-    <div class="wrapper">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/manage">Manage</RouterLink>
-        <RouterLink to="/me">Profile</RouterLink>
-      </nav>
-    </div>
+  <header class="main-app-bar">
+    <MainAppBar @toggle="toggleMenu" />
   </header>
 
-  <RouterView />
+  <nav>
+    <RouterLink to="/">Home</RouterLink>
+    <RouterLink to="/manage">Manage</RouterLink>
+    <RouterLink to="/me">Profile</RouterLink>
+  </nav>
+
+  <main>
+    <RouterView />
+  </main>
 </template>
+
+<script setup lang="ts">
+import { RouterLink, RouterView } from 'vue-router'
+import MainAppBar from './components/MainAppBar.vue'
+
+const toggleMenu = (isOpen: boolean) => {
+  const nav = document.querySelector('nav')
+  nav?.classList.toggle('close', !isOpen)
+}
+</script>
 
 <style scoped>
 header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+  background-color: var(--color-background);
+  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.1);
 }
 
 nav {
   width: 100%;
+  height: 3rem;
   font-size: 12px;
   text-align: center;
-  margin-top: 2rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  background-color: var(--color-background);
+  box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.1);
+}
+
+nav.close {
+  height: 0;
 }
 
 nav a.router-link-exact-active {
@@ -44,7 +56,7 @@ nav a.router-link-exact-active:hover {
 
 nav a {
   display: inline-block;
-  padding: 0 1rem;
+  padding: 0.8rem 1rem;
   border-left: 1px solid var(--color-border);
 }
 
@@ -52,30 +64,7 @@ nav a:first-of-type {
   border: 0;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
+main {
+  padding-bottom: 1rem;
 }
 </style>
