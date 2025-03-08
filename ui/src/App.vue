@@ -65,6 +65,12 @@ nav a:first-of-type {
 }
 
 main {
+  padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+  flex-grow: 1;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 </style>
