@@ -2,6 +2,8 @@
   <div>
     <div v-if="loading" class="loading">Loading...</div>
 
+    <DisruptionBeanList :disruptions="dailyItems" />
+
     <div class="button-list" v-if="disruptions">
       <EventAddButton @click="gotoAddDisruptionItem.navigate">Add Item</EventAddButton>
       <EventItemButton
@@ -21,6 +23,7 @@ import { useLink, useRoute } from 'vue-router'
 
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
+import DisruptionBeanList from '@/components/DisruptionBeanList.vue'
 import EventItemButton from '@/components/EventItemButton.vue'
 import EventAddButton from '@/components/EventAddButton.vue'
 
@@ -28,6 +31,7 @@ const route = useRoute()
 const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })
 
 const disruptions = ref<DisruptionItemList | null>(null)
+const dailyItems = ref<DisruptionItemList | null>(null)
 const loading = ref(false)
 
 /**
