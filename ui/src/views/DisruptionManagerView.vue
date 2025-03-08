@@ -1,15 +1,29 @@
+<style scoped>
+button {
+  display: none;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: stretch;
+}
+</style>
+
 <template>
   <div>
     <div v-if="loading" class="loading">Loading...</div>
 
-    <div v-if="disruptions">
-      <ul v-for="disruption in disruptions" :key="disruption.id">
-        <li>{{ disruption.name }}: {{ disruption.description }}</li>
-      </ul>
-    </div>
+    <button @click="gotoAddDisruptionItem.navigate">Add Item</button>
 
-    <div v-if="disruptions">
-      <button @click="gotoAddDisruptionItem.navigate">Add Item</button>
+    <div class="item-list" v-if="disruptions">
+      <DisruptionDetailsItem
+        v-for="disruption in disruptions"
+        :key="disruption.id"
+        :item="disruption"
+      />
     </div>
   </div>
 </template>
@@ -20,6 +34,8 @@ import { useLink, useRoute } from 'vue-router'
 
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
+
+import DisruptionDetailsItem from '@/components/DisruptionDetailsItem.vue'
 
 const route = useRoute()
 const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })

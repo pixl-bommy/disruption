@@ -20,5 +20,8 @@ code.header {
   display: block;
   font-size: 1.5em;
   font-weight: bold;
+
+  white-space: nowrap;
+  overflow: ellipsis;
 }
 </style>
