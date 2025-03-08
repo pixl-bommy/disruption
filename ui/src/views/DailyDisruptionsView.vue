@@ -4,16 +4,11 @@
 
     <DisruptionBeanList :disruptions="dailyItems" />
 
-    <div class="button-list" v-if="disruptions">
-      <EventAddButton @click="gotoAddDisruptionItem.navigate">Add Item</EventAddButton>
-      <EventItemButton
-        v-for="disruption in disruptions"
-        :key="disruption.id"
-        :item-id="disruption.id"
-        :button-text="disruption.name"
-        @click="handleDisruptionClick"
-      />
-    </div>
+    <DisruptionButtonList
+      :disruptions="disruptions"
+      :onAddItemClick="gotoAddDisruptionItem.navigate"
+      :onDisruptionClick="handleDisruptionClick"
+    />
   </div>
 </template>
 
@@ -24,8 +19,7 @@ import { useLink, useRoute } from 'vue-router'
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
 import DisruptionBeanList from '@/components/DisruptionBeanList.vue'
-import EventItemButton from '@/components/EventItemButton.vue'
-import EventAddButton from '@/components/EventAddButton.vue'
+import DisruptionButtonList from '@/components/DisruptionButtonList.vue'
 
 const route = useRoute()
 const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })
@@ -61,11 +55,3 @@ async function fetchDisruptions() {
 // fetch the list of disruption items when the route changes
 watch(() => route.path, fetchDisruptions, { immediate: true })
 </script>
-
-<style scoped>
-.button-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  justify-content: normal;
-}
-</style>
