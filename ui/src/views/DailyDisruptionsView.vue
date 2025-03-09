@@ -4,11 +4,7 @@
 
     <DisruptionBeanList :disruptions="dailyItems" />
 
-    <DisruptionButtonList
-      :disruptions="disruptions"
-      :onAddItemClick="gotoAddDisruptionItem.navigate"
-      :onDisruptionClick="handleDisruptionClick"
-    />
+    <DisruptionEvents :disruptions="disruptions" :onDisruptionClick="handleDisruptionClick" />
   </div>
 </template>
 
@@ -19,7 +15,7 @@ import { useLink, useRoute } from 'vue-router'
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
 import DisruptionBeanList from '@/components/DisruptionBeanList.vue'
-import DisruptionButtonList from '@/components/DisruptionButtonList.vue'
+import DisruptionEvents from '@/components/DisruptionEvents.vue'
 
 const route = useRoute()
 const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })

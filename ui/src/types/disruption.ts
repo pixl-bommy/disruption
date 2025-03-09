@@ -8,6 +8,10 @@ export interface DisruptionItem {
   name: string
   /** The description of the disruption item. */
   description: string
+  /** The icon of the disruption item. */
+  icon: string
+  /** The color of the disruption item. */
+  color: string
 }
 
 /**

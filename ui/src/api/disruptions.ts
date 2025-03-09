@@ -49,6 +49,18 @@ export async function fetchDisruptionItems(): Promise<DisruptionItemList> {
       id: entry['uid'],
       name: entry['name'],
       description: entry['description'],
+      icon: entry['icon'] ?? 'default',
+      color: entry['color'] ?? fallbackColors.next().value,
     }))
     .filter((entry) => entry.id && entry.name && entry.description)
 }
+
+const fallbackColors = (function* () {
+  let index = 0
+  const colors = ['black', 'darkgreen', 'navy', '#9932CC', 'chocolate']
+
+  while (true) {
+    yield colors[index]
+    index = (index + 1) % colors.length
+  }
+})()
