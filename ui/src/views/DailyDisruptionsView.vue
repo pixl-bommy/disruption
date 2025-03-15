@@ -2,7 +2,7 @@
   <div>
     <div v-if="loading" class="loading">Loading...</div>
 
-    <DisruptionBeanList :disruptions="dailyItems" />
+    <DisruptionChipList :disruptions="dailyItems" />
 
     <DisruptionEvents :disruptions="disruptions" :onDisruptionClick="handleDisruptionClick" />
   </div>
@@ -14,7 +14,7 @@ import { useLink, useRoute } from 'vue-router'
 
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
-import DisruptionBeanList from '@/components/DisruptionBeanList.vue'
+import DisruptionChipList from '@/components/DisruptionChipList.vue'
 import DisruptionEvents from '@/components/DisruptionEvents.vue'
 
 const route = useRoute()
