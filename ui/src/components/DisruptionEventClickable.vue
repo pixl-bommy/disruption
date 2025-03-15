@@ -8,9 +8,9 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent, type Component } from 'vue'
+import { ref, watch } from 'vue'
+import { getDisruptionIcon } from '@/lib/getDisruptionIcon'
 import type { DisruptionItem } from '@/types/disruption'
-import DefaultIcon from './icons/disruptions/DefaultDisruptionIcon.vue'
 
 const props = defineProps<{
   item: DisruptionItem
@@ -20,20 +20,23 @@ const emit = defineEmits<{
   (e: 'click', payload: { itemId: string }): void
 }>()
 
-const textColor = {
-  color: props.item.color,
-}
+// the icon component to display
+const SvgIcon = ref(getDisruptionIcon(props.item.icon))
+watch(
+  () => props.item.icon,
+  (newIcon) => {
+    SvgIcon.value = getDisruptionIcon(newIcon)
+  },
+)
 
-const SvgIcon = ((iconName: string) => {
-  if (!iconName || typeof iconName !== 'string') return DefaultIcon
-
-  const iconFileName = iconName[0].toUpperCase() + iconName.slice(1)
-
-  return defineAsyncComponent<Component>({
-    loader: () => import(`@/components/icons/disruptions/${iconFileName}DisruptionIcon.vue`),
-    errorComponent: DefaultIcon,
-  })
-})(props.item.icon)
+// icon and text color
+const textColor = ref({ color: props.item.color })
+watch(
+  () => props.item.color,
+  (newColor) => {
+    textColor.value = { color: newColor }
+  },
+)
 </script>
 
 <style scoped>
@@ -44,12 +47,18 @@ const SvgIcon = ((iconName: string) => {
   justify-content: center;
   gap: 0.5rem;
 
+  cursor: pointer;
+
   background: color-mix(in srgb, currentColor 20%, white);
   border: 1px solid color-mix(in srgb, currentColor 40%, white);
   border-radius: 0.8rem;
   padding: 0.7rem;
 
-  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.container:active {
+  background: color-mix(in srgb, currentColor 35%, white);
 }
 
 .icon-container {

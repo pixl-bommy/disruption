@@ -41,6 +41,7 @@ async function fetchDisruptions() {
   try {
     const itemList = await fetchDisruptionItems()
     disruptions.value = itemList
+    dailyItems.value = itemList
   } catch (err) {
     console.error(err)
   } finally {
