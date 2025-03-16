@@ -66,6 +66,7 @@ func GetDisruptions(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("api/v1: GetDisruptions failed to get all disruptions:", err)
 
 		// return empty array if no entries found
+		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte("[]"))
 		return
 	}

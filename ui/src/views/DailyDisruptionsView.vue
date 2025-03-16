@@ -20,12 +20,12 @@ import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
 import DisruptionChipList from '@/components/DisruptionChipList.vue'
 import DisruptionEvents from '@/components/DisruptionEvents.vue'
+import { fetchEventItems } from '@/api/dailyDisruptions'
 
 const route = useRoute()
 
 const disruptions = ref<DisruptionItemList | null>(null)
 const dailyItems = ref<DisruptionItemList | null>(null)
-const loading = ref(false)
 
 /**
  * Handle the click event on a disruption item.
@@ -39,19 +39,36 @@ async function handleDisruptionClick(payload: { itemId: string }) {
  */
 async function fetchDisruptions() {
   disruptions.value = null
-  loading.value = true
 
   try {
     const itemList = await fetchDisruptionItems()
     disruptions.value = itemList
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/**
+ * Fetch the list of event items from the API.
+ */
+async function fetchEvents() {
+  disruptions.value = null
+
+  try {
+    const itemList = await fetchEventItems()
     dailyItems.value = itemList
   } catch (err) {
     console.error(err)
-  } finally {
-    loading.value = false
   }
 }
 
 // fetch the list of disruption items when the route changes
-watch(() => route.path, fetchDisruptions, { immediate: true })
+watch(
+  () => route.path,
+  () => {
+    fetchDisruptions()
+    fetchEvents()
+  },
+  { immediate: true },
+)
 </script>
