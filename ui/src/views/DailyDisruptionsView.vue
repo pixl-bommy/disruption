@@ -16,9 +16,14 @@
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { fetchEventItems } from '@/api/dailyDisruptions'
+import { fetchCreateDailyEventItem, fetchEventItems } from '@/api/dailyDisruptions'
 import { fetchDisruptionItems } from '@/api/disruptions'
-import type { DailyEventItemList } from '@/types/dailyEvent'
+import {
+  DailyEventItemStatus,
+  type DailyEventItem,
+  type DailyEventItemList,
+  type DailyEventItemUnsettled,
+} from '@/types/dailyEvent'
 import type { DisruptionItemList } from '@/types/disruption'
 import DisruptionChipList from '@/components/DisruptionChipList.vue'
 import DisruptionEvents from '@/components/DisruptionEvents.vue'
@@ -32,7 +37,44 @@ const dailyItems = ref<DailyEventItemList | null>(null)
  * Handle the click event on a disruption item.
  */
 async function handleDisruptionClick(payload: { itemId: string }) {
-  console.log('Disruption clicked:', payload.itemId)
+  const relatedDisruption = disruptions.value?.find((item) => item.id === payload.itemId)
+
+  if (!relatedDisruption) {
+    // NOTE: This should never happen. But maybe we want to catch this case.
+    console.error('Disruption not found:', payload.itemId)
+    return
+  }
+
+  const temporaryId = Date.now() + '-0'
+
+  const newItem: DailyEventItem = {
+    status: DailyEventItemStatus.Queued,
+    id: temporaryId,
+
+    disruptionId: relatedDisruption.id,
+    name: relatedDisruption.name,
+    color: relatedDisruption.color,
+    iconName: relatedDisruption.icon,
+  }
+
+  console.log('Disruption clicked:', newItem)
+
+  dailyItems.value = [...(dailyItems.value || []), newItem]
+
+  try {
+    dailyItems.value = (dailyItems.value || []).map((item) =>
+      item.id === temporaryId ? { ...newItem, status: DailyEventItemStatus.Sending } : item,
+    )
+
+    const newItemList = await fetchCreateDailyEventItem(newItem)
+    dailyItems.value = newItemList
+  } catch (err) {
+    console.error(err)
+
+    dailyItems.value = (dailyItems.value || []).map((item) =>
+      item.id === temporaryId ? { ...newItem, status: DailyEventItemStatus.Failed } : item,
+    )
+  }
 }
 
 /**

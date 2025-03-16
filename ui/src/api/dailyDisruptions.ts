@@ -1,7 +1,12 @@
 import type { DisruptionItem, DisruptionItemList } from '@/types/disruption'
 
 import { serverApiBaseURL } from './_root'
-import type { DailyEventItem, DailyEventItemList } from '@/types/dailyEvent'
+import {
+  DailyEventItemStatus,
+  type DailyEventItem,
+  type DailyEventItemList,
+  type DailyEventItemUnsettled,
+} from '@/types/dailyEvent'
 
 // The base url for the events api.
 const disruptionsApiBaseUrl = serverApiBaseURL + '/events'
@@ -33,12 +38,34 @@ export async function fetchEventItems(date: Date = new Date()): Promise<DailyEve
     .map<DailyEventItem>((entry) => ({
       id: entry['uid'],
       disruptionId: entry['disruptionId'],
-      disruptionName: entry['disruptionName'],
-      status: entry['status'],
-      replacedBy: entry['replacedBy'],
-      replaces: entry['replaces'],
+      name: entry['disruptionName'],
+      status: DailyEventItemStatus.Completed,
       iconName: entry['icon'] ?? 'default',
       color: entry['color'] ?? '#000000',
     }))
-    .filter((entry) => entry.id && entry.disruptionId && entry.disruptionName)
+    .filter((entry) => entry.id && entry.disruptionId && entry.name)
+}
+
+export async function fetchCreateDailyEventItem(
+  newItem: DailyEventItemUnsettled,
+): Promise<DailyEventItemList> {
+  const timeoutJob = new Promise((resolve) => {
+    setTimeout(() => resolve(null), 1000)
+  })
+
+  const fetchingJob = fetch(`${disruptionsApiBaseUrl}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ disruptionId: newItem.disruptionId }),
+  })
+
+  const [response] = await Promise.all([fetchingJob, timeoutJob])
+
+  if (!response.ok) {
+    throw new Error('Failed to create daily event item')
+  }
+
+  return fetchEventItems()
 }
