@@ -9,7 +9,7 @@ const (
 	DisruptionStatusDeleted DisruptionStatus = "deleted"
 )
 
-type DisruptionEntry struct {
+type DisruptionEntity struct {
 	UID         uuid.UUID        `json:"-" redis:"-"`
 	Name        string           `json:"-" redis:"-"`
 	Description string           `json:"-" redis:"-"`
@@ -19,7 +19,7 @@ type DisruptionEntry struct {
 	ModifiedAt  int64            `json:"-" redis:"-"`
 }
 
-type DisruptionEntryRaw struct {
+type DisruptionEntityExportable struct {
 	UID         string `json:"uid"                   redis:"uid"`
 	Name        string `json:"name,omitempty"        redis:"name,omitempty"`
 	Description string `json:"description,omitempty" redis:"description,omitempty"`
@@ -29,13 +29,13 @@ type DisruptionEntryRaw struct {
 	ModifiedAt  int64  `json:"modifiedAt,omitempty"  redis:"modified_at,omitempty"`
 }
 
-func NewDisruptionEntry(name, description string, modifiedBy string) (*DisruptionEntry, error) {
+func NewDisruptionEntity(name, description string, modifiedBy string) (*DisruptionEntity, error) {
 	modifierUserId, err := uuid.Parse(modifiedBy)
 	if err != nil {
 		return nil, err
 	}
 
-	return &DisruptionEntry{
+	return &DisruptionEntity{
 		UID:         uuid.New(),
 		Name:        name,
 		Description: description,
@@ -44,7 +44,7 @@ func NewDisruptionEntry(name, description string, modifiedBy string) (*Disruptio
 	}, nil
 }
 
-func PartialDisruptionEntry(uid, modifiedBy string) (*DisruptionEntry, error) {
+func PartialDisruptionEntity(uid, modifiedBy string) (*DisruptionEntity, error) {
 	uidUUID, err := uuid.Parse(uid)
 	if err != nil {
 		return nil, err
@@ -55,14 +55,14 @@ func PartialDisruptionEntry(uid, modifiedBy string) (*DisruptionEntry, error) {
 		return nil, err
 	}
 
-	return &DisruptionEntry{
+	return &DisruptionEntity{
 		UID:        uidUUID,
 		ModifiedBy: modifierUserId,
 	}, nil
 }
 
-func (d *DisruptionEntryRaw) ToDisruptionEntry() DisruptionEntry {
-	return DisruptionEntry{
+func (d *DisruptionEntityExportable) ToEntity() DisruptionEntity {
+	return DisruptionEntity{
 		UID:         uuid.MustParse(d.UID),
 		Name:        d.Name,
 		Description: d.Description,
@@ -73,8 +73,8 @@ func (d *DisruptionEntryRaw) ToDisruptionEntry() DisruptionEntry {
 	}
 }
 
-func (d *DisruptionEntry) ToDisruptionEntryRaw() DisruptionEntryRaw {
-	return DisruptionEntryRaw{
+func (d *DisruptionEntity) ToExportable() DisruptionEntityExportable {
+	return DisruptionEntityExportable{
 		UID:         d.UID.String(),
 		Name:        d.Name,
 		Description: d.Description,

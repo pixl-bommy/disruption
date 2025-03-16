@@ -18,6 +18,6 @@ func (s *DisruptionService) Delete(uid, userId string) (bool, error) {
 	return s.repo.Delete(uid, userId)
 }
 
-func (s *DisruptionService) GetAll() ([]*storage.DisruptionEntryRaw, error) {
+func (s *DisruptionService) GetAll() ([]*storage.DisruptionEntityExportable, error) {
 	return s.repo.GetAll()
 }

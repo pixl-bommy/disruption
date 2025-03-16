@@ -26,7 +26,7 @@ func NewRedisDisruptionRepository(client *redis.Client, context *context.Context
 
 func (r *RedisDisruptionRepository) Create(name, description, userId string) (string, error) {
 	// create disruption item
-	disruptionItem, err := NewDisruptionEntry(name, description, userId)
+	disruptionItem, err := NewDisruptionEntity(name, description, userId)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func (r *RedisDisruptionRepository) Delete(uid, userId string) (bool, error) {
 	//       uid and userId. If not, we should return an error here.
 
 	// create disruption item with only updated values
-	disruptionItem, err := PartialDisruptionEntry(uid, userId)
+	disruptionItem, err := PartialDisruptionEntity(uid, userId)
 	if err != nil {
 		fmt.Println("Failed to create partial disruption entry:", err)
 		return false, err
@@ -91,7 +91,7 @@ func (r *RedisDisruptionRepository) Delete(uid, userId string) (bool, error) {
 	return true, nil
 }
 
-func (r *RedisDisruptionRepository) GetAll() ([]*DisruptionEntryRaw, error) {
+func (r *RedisDisruptionRepository) GetAll() ([]*DisruptionEntityExportable, error) {
 	// read all entries from "derivate" store
 	derivateRootKey := configs.KeyPrefix + ":" + disruptionsDerivateKey + ":*"
 	derivateItemKeys, err := r.client.Keys(*r.context, derivateRootKey).Result()
@@ -100,7 +100,7 @@ func (r *RedisDisruptionRepository) GetAll() ([]*DisruptionEntryRaw, error) {
 	}
 
 	// read all entries from "derivate" store
-	disruptionEntries := make([]*DisruptionEntryRaw, 0)
+	disruptionEntries := make([]*DisruptionEntityExportable, 0)
 	for _, derivateKey := range derivateItemKeys {
 		derivateItem, err := r.client.HGetAll(*r.context, derivateKey).Result()
 		if err != nil {
@@ -123,7 +123,7 @@ func (r *RedisDisruptionRepository) GetAll() ([]*DisruptionEntryRaw, error) {
 }
 
 // Stores the a disruption item in the redis "event source" stream.
-func (r *RedisDisruptionRepository) storePartialSourceEntry(disruptionItem *DisruptionEntry) (int64, error) {
+func (r *RedisDisruptionRepository) storePartialSourceEntry(disruptionItem *DisruptionEntity) (int64, error) {
 	fmt.Println("storePartialSourceEntry:", disruptionItem)
 
 	// create redis target key
@@ -131,7 +131,7 @@ func (r *RedisDisruptionRepository) storePartialSourceEntry(disruptionItem *Disr
 
 	// store disruption item as Stream in redis
 	xAddArgs := &redis.XAddArgs{
-		Stream: sourceKey, Values: disruptionItem.ToDisruptionEntryRaw(),
+		Stream: sourceKey, Values: disruptionItem.ToExportable(),
 	}
 
 	redisStreamId, err := r.client.XAdd(*r.context, xAddArgs).Result()
@@ -155,12 +155,12 @@ func (r *RedisDisruptionRepository) storePartialSourceEntry(disruptionItem *Disr
 }
 
 // Stores the a disruption item in the redis "derivate" stream.
-func (r *RedisDisruptionRepository) storeDerivateEntry(disruptionItem *DisruptionEntry) error {
+func (r *RedisDisruptionRepository) storeDerivateEntry(disruptionItem *DisruptionEntity) error {
 	// create redis target key
 	derivateKey := configs.KeyPrefix + ":" + disruptionsDerivateKey + ":" + disruptionItem.UID.String()
 
 	// store disruption item as Hash in redis
-	err := r.client.HSet(*r.context, derivateKey, disruptionItem.ToDisruptionEntryRaw()).Err()
+	err := r.client.HSet(*r.context, derivateKey, disruptionItem.ToExportable()).Err()
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (r *RedisDisruptionRepository) storeDerivateEntry(disruptionItem *Disruptio
 	return nil
 }
 
-func parseHashToDisruptionEntryRaw(hash map[string]string) (*DisruptionEntryRaw, error) {
+func parseHashToDisruptionEntryRaw(hash map[string]string) (*DisruptionEntityExportable, error) {
 	// make sure all required fields are present
 	if _, ok := hash["uid"]; !ok {
 		return nil, fmt.Errorf("missing field 'uid'")
@@ -196,7 +196,7 @@ func parseHashToDisruptionEntryRaw(hash map[string]string) (*DisruptionEntryRaw,
 		return nil, err
 	}
 
-	return &DisruptionEntryRaw{
+	return &DisruptionEntityExportable{
 		UID:         hash["uid"],
 		Name:        hash["name"],
 		Description: hash["description"],
