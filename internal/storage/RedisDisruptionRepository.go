@@ -91,6 +91,27 @@ func (r *RedisDisruptionRepository) Delete(uid, userId string) (bool, error) {
 	return true, nil
 }
 
+func (r *RedisDisruptionRepository) Get(uid string) (*DisruptionEntity, error) {
+	derivateItemKey := configs.KeyPrefix + ":" + disruptionsDerivateKey + ":" + uid
+
+	derivateItem, err := r.client.HGetAll(*r.context, derivateItemKey).Result()
+	if err != nil {
+		fmt.Println("Failed to read derivate entry:", err)
+		return nil, err
+	}
+
+	// parse
+	disruptionEntry, err := parseHashToDisruptionEntryRaw(derivateItem)
+	if err != nil {
+		fmt.Println("Failed to parse derivate entry:", err)
+		return nil, err
+	}
+
+	// return the item
+	item := disruptionEntry.ToEntity()
+	return &item, nil
+}
+
 func (r *RedisDisruptionRepository) GetAll() ([]*DisruptionEntityExportable, error) {
 	// read all entries from "derivate" store
 	derivateRootKey := configs.KeyPrefix + ":" + disruptionsDerivateKey + ":*"
@@ -169,6 +190,8 @@ func (r *RedisDisruptionRepository) storeDerivateEntry(disruptionItem *Disruptio
 }
 
 func parseHashToDisruptionEntryRaw(hash map[string]string) (*DisruptionEntityExportable, error) {
+	// TODO: Think about if this returs the correct type.
+
 	// make sure all required fields are present
 	if _, ok := hash["uid"]; !ok {
 		return nil, fmt.Errorf("missing field 'uid'")
