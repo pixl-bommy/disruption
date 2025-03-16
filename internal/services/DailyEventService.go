@@ -1,6 +1,8 @@
 package services
 
-import "github.com/pixl-bommy/disruption/internal/storage"
+import (
+	"github.com/pixl-bommy/disruption/internal/storage"
+)
 
 type DailyEventService struct {
 	repo storage.DailyEventRepository
@@ -17,4 +19,8 @@ func (s *DailyEventService) Create(disruptionId string, userId string) (string, 
 	}
 
 	return s.repo.Create(disruption, userId)
+}
+
+func (s *DailyEventService) Get(from, to int64) ([]*storage.DailyEventEntityExportable, error) {
+	return s.repo.Get(from, to)
 }

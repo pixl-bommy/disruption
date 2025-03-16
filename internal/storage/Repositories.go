@@ -9,4 +9,5 @@ type DisruptionRepository interface {
 
 type DailyEventRepository interface {
 	Create(disruption *DisruptionEntity, userId string) (string, error)
+	Get(from, to int64) ([]*DailyEventEntityExportable, error)
 }

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="!dailyItems" class="loading">Loading...</div>
-    <DisruptionChipList v-else :disruptions="dailyItems" />
+    <DisruptionChipList v-else :dailyEvents="dailyItems" />
 
     <div v-if="!disruptions" class="loading">Loading...</div>
     <DisruptionEvents
@@ -16,16 +16,17 @@
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
+import { fetchEventItems } from '@/api/dailyDisruptions'
 import { fetchDisruptionItems } from '@/api/disruptions'
+import type { DailyEventItemList } from '@/types/dailyEvent'
 import type { DisruptionItemList } from '@/types/disruption'
 import DisruptionChipList from '@/components/DisruptionChipList.vue'
 import DisruptionEvents from '@/components/DisruptionEvents.vue'
-import { fetchEventItems } from '@/api/dailyDisruptions'
 
 const route = useRoute()
 
 const disruptions = ref<DisruptionItemList | null>(null)
-const dailyItems = ref<DisruptionItemList | null>(null)
+const dailyItems = ref<DailyEventItemList | null>(null)
 
 /**
  * Handle the click event on a disruption item.

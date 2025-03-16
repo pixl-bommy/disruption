@@ -1,22 +1,22 @@
 <template>
   <div class="disruption-list">
     <Chip
-      v-for="(disruption, index) of props.disruptions"
+      v-for="(disruption, index) of props.dailyEvents"
       :color="disruption.color"
-      :icon="disruption.icon"
-      :name="disruption.name"
-      :closed="index + 1 !== props.disruptions?.length"
+      :icon="disruption.iconName"
+      :name="disruption.disruptionName"
+      :closed="index + 1 !== props.dailyEvents?.length"
       :key="disruption.id"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { DisruptionItemList } from '@/types/disruption'
+import type { DailyEventItemList } from '@/types/dailyEvent'
 import Chip from './Chip.vue'
 
 const props = defineProps<{
-  disruptions: DisruptionItemList | null
+  dailyEvents: DailyEventItemList | null
 }>()
 </script>
 

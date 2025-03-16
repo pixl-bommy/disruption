@@ -1,6 +1,7 @@
 import type { DisruptionItem, DisruptionItemList } from '@/types/disruption'
 
 import { serverApiBaseURL } from './_root'
+import type { DailyEventItem, DailyEventItemList } from '@/types/dailyEvent'
 
 // The base url for the events api.
 const disruptionsApiBaseUrl = serverApiBaseURL + '/events'
@@ -10,7 +11,7 @@ const disruptionsApiBaseUrl = serverApiBaseURL + '/events'
  * @returns A promise that resolves to an array of event items.
  * @throws An error if the fetch request fails or the response is not of the expected format.
  */
-export async function fetchEventItems(date: Date = new Date()): Promise<DisruptionItemList> {
+export async function fetchEventItems(date: Date = new Date()): Promise<DailyEventItemList> {
   const timestamp = date.getTime()
   const offset = date.getTimezoneOffset()
   const apiRequestUrl = `${disruptionsApiBaseUrl}/${timestamp}?offset=${offset}`
@@ -29,4 +30,15 @@ export async function fetchEventItems(date: Date = new Date()): Promise<Disrupti
   }
 
   return rawJson
+    .map<DailyEventItem>((entry) => ({
+      id: entry['uid'],
+      disruptionId: entry['disruptionId'],
+      disruptionName: entry['disruptionName'],
+      status: entry['status'],
+      replacedBy: entry['replacedBy'],
+      replaces: entry['replaces'],
+      iconName: entry['icon'] ?? 'default',
+      color: entry['color'] ?? '#000000',
+    }))
+    .filter((entry) => entry.id && entry.disruptionId && entry.disruptionName)
 }

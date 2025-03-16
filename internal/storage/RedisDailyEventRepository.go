@@ -10,8 +10,7 @@ import (
 )
 
 const (
-	dailyEventSourceKey   = "sources:events:%s"
-	dailyEventDerivateKey = "derivates:events:%s"
+	dailyEventSourceKey = "sources:events:%s"
 )
 
 type RedisDailyEventRepository struct {
@@ -41,19 +40,62 @@ func (r *RedisDailyEventRepository) Create(disruption *DisruptionEntity, userId 
 		return "", err
 	}
 
-	redisStreamId, err := r.storePartialSourceEntry(dailyEvent, userId)
+	dailyEventId, err := r.storePartialSourceEntry(dailyEvent, userId)
 	if err != nil {
 		return "", err
 	}
 
-	dailyEvent.UID = redisStreamId
+	return dailyEventId, nil
+}
 
-	err = r.storeDerivateEntry(dailyEvent, userId)
-	if err != nil {
-		return "", err
+func (r *RedisDailyEventRepository) Get(from, to int64) ([]*DailyEventEntityExportable, error) {
+	// 1. check from and to are valid
+	// 2. get daily event items from redis "event derivate"
+	// 3. return the items
+
+	if from < 0 || to < 0 || from > to {
+		return nil, fmt.Errorf("invalid from/to timestamps")
 	}
 
-	return dailyEvent.UID, nil
+	// get all daily event items from redis
+	derivateKey := configs.KeyPrefix + ":" + fmt.Sprintf(dailyEventSourceKey, configs.OneAndOnlyUserUid)
+	derivateItems, err := r.client.XRange(*r.context, derivateKey, fmt.Sprintf("%d", from), fmt.Sprintf("%d", to)).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Get[DailyEventEntity]:", derivateItems)
+
+	// convert the items to daily event entities
+	dailyEvents := make([]*DailyEventEntityExportable, 0)
+	for _, item := range derivateItems {
+		dailyEvent := DailyEventEntityExportable{UID: item.ID}
+
+		if disruptionId, ok := item.Values["disruption_id"].(string); ok {
+			dailyEvent.DisruptionId = disruptionId
+		}
+
+		if disruptionName, ok := item.Values["disruption_name"].(string); ok {
+			dailyEvent.DisruptionName = disruptionName
+		}
+
+		if status, ok := item.Values["status"].(string); ok {
+			dailyEvent.Status = status
+		}
+
+		if iconName, ok := item.Values["icon_name"].(string); ok {
+			dailyEvent.IconName = iconName
+		}
+
+		if color, ok := item.Values["color"].(string); ok {
+			dailyEvent.Color = color
+		}
+
+		dailyEvents = append(dailyEvents, &dailyEvent)
+	}
+
+	// return the daily event entities
+	return dailyEvents, nil
 }
 
 // Stores the a daily event item in the redis "event source" stream.
@@ -76,21 +118,4 @@ func (r *RedisDailyEventRepository) storePartialSourceEntry(dailyEvent *DailyEve
 
 	// return the created stream id
 	return redisStreamId, nil
-}
-
-// Stores the a daily event item in the redis "event derivate" store.
-func (r *RedisDailyEventRepository) storeDerivateEntry(dailyEvent *DailyEventEntity, userId string) error {
-	fmt.Println("storeDerivateEntry[DailyEventEntity]:", dailyEvent)
-
-	// create redis target keys
-	derivateKey := configs.KeyPrefix + ":" + fmt.Sprintf(dailyEventDerivateKey, userId)
-
-	// store disruption item as Hash in redis
-	_, err := r.client.HSet(*r.context, derivateKey, dailyEvent.ToExportable()).Result()
-	if err != nil {
-		return err
-	}
-
-	// return the created stream id
-	return nil
 }
