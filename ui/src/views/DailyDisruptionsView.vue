@@ -1,16 +1,20 @@
 <template>
   <div>
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="!dailyItems" class="loading">Loading...</div>
+    <DisruptionChipList v-else :disruptions="dailyItems" />
 
-    <DisruptionChipList :disruptions="dailyItems" />
-
-    <DisruptionEvents :disruptions="disruptions" :onDisruptionClick="handleDisruptionClick" />
+    <div v-if="!disruptions" class="loading">Loading...</div>
+    <DisruptionEvents
+      v-else
+      :disruptions="disruptions"
+      :onDisruptionClick="handleDisruptionClick"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import { useLink, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 import { fetchDisruptionItems } from '@/api/disruptions'
 import type { DisruptionItemList } from '@/types/disruption'
@@ -18,7 +22,6 @@ import DisruptionChipList from '@/components/DisruptionChipList.vue'
 import DisruptionEvents from '@/components/DisruptionEvents.vue'
 
 const route = useRoute()
-const gotoAddDisruptionItem = useLink({ to: '/add-disruption-item' })
 
 const disruptions = ref<DisruptionItemList | null>(null)
 const dailyItems = ref<DisruptionItemList | null>(null)
