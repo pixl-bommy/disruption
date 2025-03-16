@@ -48,7 +48,7 @@ export async function fetchEventItems(date: Date = new Date()): Promise<DailyEve
 
 export async function fetchCreateDailyEventItem(
   newItem: DailyEventItemUnsettled,
-): Promise<DailyEventItemList> {
+): Promise<DailyEventItem> {
   const timeoutJob = new Promise((resolve) => {
     setTimeout(() => resolve(null), 1000)
   })
@@ -67,5 +67,7 @@ export async function fetchCreateDailyEventItem(
     throw new Error('Failed to create daily event item')
   }
 
-  return fetchEventItems()
+  const { eventId } = await response.json()
+
+  return { ...newItem, id: eventId, status: DailyEventItemStatus.Completed }
 }

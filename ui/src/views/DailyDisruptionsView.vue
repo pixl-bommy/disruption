@@ -66,8 +66,11 @@ async function handleDisruptionClick(payload: { itemId: string }) {
       item.id === temporaryId ? { ...newItem, status: DailyEventItemStatus.Sending } : item,
     )
 
-    const newItemList = await fetchCreateDailyEventItem(newItem)
-    dailyItems.value = newItemList
+    const settledItem = await fetchCreateDailyEventItem(newItem)
+
+    dailyItems.value = (dailyItems.value || []).map((item) =>
+      item.id === temporaryId ? settledItem : item,
+    )
   } catch (err) {
     console.error(err)
 

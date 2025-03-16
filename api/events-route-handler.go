@@ -54,7 +54,17 @@ func CreateEvent(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("api/v1: CreateEvent succeeded - id:", eventId)
 
 	// TODO: implement route for -> w.Header().Add("Location", "/events/"+eventId)
+	w.Header().Add("Location", "/events/"+eventId)
 	w.WriteHeader(http.StatusCreated)
+	err = json.NewEncoder(w).Encode(map[string]string{
+		"eventId": eventId,
+	})
+	if err != nil {
+		fmt.Println("api/v1: GetEvents failed to encode events:", err)
+
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetEvents(w http.ResponseWriter, r *http.Request) {
